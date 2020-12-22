@@ -16,7 +16,6 @@ def test_open_cam():
                 connected_cam.append(port)
         except:
             continue
-    print(connected_cam)
     return(connected_cam)
 
 
@@ -125,9 +124,9 @@ def color_video(frame, menu, scale):
 def video_capture(connected_cam, cam_no):
     total_cam = len(connected_cam)
     current_cam = cam_no
+    windows = windows_propreties('Roro Software')
     # Loop for changing cam index
-    while True:
-        windows = windows_propreties('Roro Software')
+    while (cv2.getWindowProperty(windows, 0) >= 0):
         cam = cv2.VideoCapture(connected_cam[current_cam])
         cam = input_resolution(cam, 1920, 1080, 30)
         # init values for menu and zoom
@@ -144,7 +143,7 @@ def video_capture(connected_cam, cam_no):
         frame_nb = 0
         frame_max = 10
         # get, modify and display frame
-        while(cam.isOpened()):
+        while cam.isOpened():
             # init fps calculation
             if frame_nb == 0:
                 now = time.time()
@@ -179,7 +178,8 @@ def video_capture(connected_cam, cam_no):
                     current_cam = 0
                 else:
                     current_cam += 1
-            if key & 0xFF == 27:  # escape
+            # quit if key & 0xFF == 27:  # escape
+            if cv2.getWindowProperty(windows, cv2.WND_PROP_VISIBLE) < 1:
                 save_default_cam(connected_cam[current_cam])
                 cam.release()
                 cv2.destroyAllWindows()
