@@ -28,8 +28,13 @@ class App:
         self.btn_zoom = tk.Scale(
                                  self.frame_ctrl,
                                  orient='horizontal',
-                                 length=500
+                                 length=500,
+                                 width=50,
+                                 from_=1,
+                                 to=10,
+                                 resolution=1
                                  )
+        self.btn_zoom.set(1)
         self.btn_zoom.grid(row=0, column=2,  padx=(10), pady=10)
 
         # open video source
@@ -49,6 +54,7 @@ class App:
     def update(self):
         ret, frame = self.vid.get_frame()
         if ret:
+            frame = self.scale_video(frame)
             frame = self.vid_resize(frame)
             self.photo = PIL.ImageTk.PhotoImage(
                          image=PIL.Image.fromarray(frame))
@@ -56,6 +62,27 @@ class App:
                                         self.res[1]/2,
                                         image=self.photo)
         self.frame_vid.after(self.delay, self.update)
+
+    def scale_video(self, frame):
+        transco = {1: 1,
+                   2: 0.9,
+                   3: 0.8,
+                   4: 0.7,
+                   5: 0.6,
+                   6: 0.5,
+                   7: 0.4,
+                   8: 0.3,
+                   9: 0.2,
+                   10: 0.1}
+        select = self.btn_zoom.get()
+        scale = transco[select]
+        # calcul de la plage à afficher
+        centerX, centerY = int(self.vid.height/2), int(self.vid.width/2)
+        radiusX, radiusY = int(centerX*scale), int(centerY*scale)
+        minX, maxX = centerX - radiusX, centerX + radiusX
+        minY, maxY = centerY - radiusY, centerY + radiusY
+        cropped = frame[minX:maxX, minY:maxY]
+        return cropped
 
     def vid_resize(self, frame):
         ratio_width = (self.vid.width/self.res[0])
