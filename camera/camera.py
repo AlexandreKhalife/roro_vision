@@ -4,6 +4,7 @@
 import cv2
 import numpy as np
 import pickle
+import time
 
 
 def test_open_cam():
@@ -139,10 +140,13 @@ def video_capture(connected_cam, cam_no):
         change_limit = 0.005
         change_statut = 1
         key = -1
+        # for fps calculation
+        frame_nb = 0
+        frame_max = 10
         while(cam.isOpened()):
-            """
-            Video stream
-            """
+            # init fps start
+            if frame_nb == 0:
+                now = time.time()
             # recuperation du stream video
             ret, frame = cam.read()
             change_statut, previous_frame = move_detection(frame,
@@ -156,6 +160,14 @@ def video_capture(connected_cam, cam_no):
             if change_statut == 1 or key != -1:
                 current_frame = frame
             cv2.imshow(windows, current_frame)
+            # Calculate fps
+            frame_nb += 1
+            if frame_nb == frame_max:
+                frame_nb = 0
+                duration = (time.time() - now)
+                fps = frame_max / duration
+                print("fps = ", fps)
+
             key = cv2.waitKey(1)
             menu = change_menu(key, menu, total_menu)
             scale = change_scale(key, scale)
