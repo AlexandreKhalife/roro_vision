@@ -1,0 +1,178 @@
+# webcam zoom
+# python3 / cv2
+
+import cv2
+import numpy as np
+import pickle
+
+
+def test_open_cam():
+    connected_cam = []
+    for port in range(0, 10):
+        try:
+            cam = cv2.VideoCapture(port)
+            if cam.isOpened():
+                connected_cam.append(port)
+        except:
+            continue
+    print(connected_cam)
+    return(connected_cam)
+
+
+def get_default_cam(connected_cam):
+    try:
+        default_port = pickle.load(open('config/config', "rb"))
+        if default_port in connected_cam:
+            cam_no = connected_cam.index(default_port)
+        else:
+            cam_no = 0
+    except:
+        cam_no = 0
+        default_port = 'Null'
+        pickle.dump(default_port, open('config/config', "wb+"))
+    return cam_no
+
+
+def save_default_cam(cam_no):
+    pickle.dump(cam_no, open('config/config', "wb"))
+
+
+def input_resolution(cam, width, height, frame):
+    cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MPEG'))
+    cam.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+    cam.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+    cam.set(cv2.CAP_PROP_AUTOFOCUS, 1)
+    cam.set(cv2.CAP_PROP_FPS, frame)
+    return cam
+
+
+def windows_propreties(windows):
+    cv2.namedWindow(windows, cv2.WINDOW_KEEPRATIO)
+    cv2.resizeWindow(windows, 1000, 608)
+    return windows
+
+
+def move_detection(frame, previous_frame, change_limit):
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    diff = cv2.absdiff(frame, previous_frame)
+    diff = cv2.threshold(diff, 20, 255, cv2.THRESH_BINARY)[1]
+    h, w = diff.shape
+    pixel_deviation = np.count_nonzero(diff == 255)
+    change_ratio = (pixel_deviation/(h*w))
+    if change_ratio > change_limit:
+        change_statut = 1
+    else:
+        change_statut = 0
+    previous_frame = frame.copy()
+    return change_statut, previous_frame
+
+
+def change_menu(key, menu, total_menu):
+    if key == 83:
+        menu += 1
+        if menu > total_menu:
+            menu = 1
+    if key == 81:
+        menu -= 1
+        if menu == 0:
+            menu = total_menu
+    else:
+        menu = menu
+    return menu
+
+
+def change_scale(key, scale):
+    # press up
+    if key == 84:
+        scale = min(scale + 0.1, 1)
+    # press down
+    if key == 82:
+        scale = max(scale - 0.1, 0.1)
+    # press space
+    if key == 32:
+        scale = 1
+    return scale
+
+
+def scale_video(frame, height, width, scale):
+    # calcul de la plage à afficher
+    centerX, centerY = int(height/2), int(width/2)
+    radiusX, radiusY = int(centerX*scale), int(centerY*scale)
+    minX, maxX = centerX - radiusX, centerX + radiusX
+    minY, maxY = centerY - radiusY, centerY + radiusY
+    cropped = frame[minX:maxX, minY:maxY]
+    # affichage de l'image zoomée
+    resized_cropped = cv2.resize(cropped, (width, height))
+    return resized_cropped
+
+
+def color_video(frame, menu, scale):
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    frame = cv2.adaptiveThreshold(
+                frame, 255,
+                cv2.ADAPTIVE_THRESH_MEAN_C,
+                cv2.ADAPTIVE_THRESH_MEAN_C,
+                29, 15
+                )
+    frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
+    if menu == 2:
+        frame[np.where((frame == [255, 255, 255]).all(axis=2))
+              ] = [240, 240, 240]
+    if menu == 3:
+        frame[np.where((frame == [0, 0, 0]).all(axis=2))] = [0, 240, 240]
+        frame[np.where((frame == [255, 255, 255]).all(axis=2))] = [0, 0, 0]
+    return frame
+
+
+def video_capture(connected_cam, cam_no):
+    total_cam = len(connected_cam)
+    current_cam = cam_no
+    while True:
+        windows = windows_propreties('Roro Software')
+        cam = cv2.VideoCapture(connected_cam[current_cam])
+        cam = input_resolution(cam, 1920, 1080, 30)
+        scale = 1
+        total_menu = 3
+        menu = 1
+        current_frame = 0
+        previous_frame = 0
+        change_limit = 0.005
+        change_statut = 1
+        key = -1
+        while(cam.isOpened()):
+            """
+            Video stream
+            """
+            # recuperation du stream video
+            ret, frame = cam.read()
+            change_statut, previous_frame = move_detection(frame,
+                                                           previous_frame,
+                                                           change_limit)
+            # Action on current_frame
+            height, width, channels = frame.shape
+            frame = scale_video(frame, height, width, scale)
+            if menu != 1:
+                frame = color_video(frame, menu, scale)
+            if change_statut == 1 or key != -1:
+                current_frame = frame
+            cv2.imshow(windows, current_frame)
+            key = cv2.waitKey(1)
+            menu = change_menu(key, menu, total_menu)
+            scale = change_scale(key, scale)
+            if key & 0xFF == ord('c'):
+                cam.release()
+                if current_cam == total_cam - 1:
+                    current_cam = 0
+                else:
+                    current_cam += 1
+            if key & 0xFF == 27:
+                save_default_cam(connected_cam[current_cam])
+                cam.release()
+                cv2.destroyAllWindows()
+                quit()
+
+
+if __name__ == '__main__':
+    connected_cam = test_open_cam()
+    cam_no = get_default_cam(connected_cam)
+    video_capture(connected_cam, cam_no)
