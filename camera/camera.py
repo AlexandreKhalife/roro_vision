@@ -38,19 +38,19 @@ def save_default_cam(cam_no):
     pickle.dump(cam_no, open('config/config', "wb"))
 
 
-def input_resolution(cam, width, height, frame):
-    cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MPEG'))
-    cam.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-    cam.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-    cam.set(cv2.CAP_PROP_AUTOFOCUS, 1)
-    cam.set(cv2.CAP_PROP_FPS, frame)
-    return cam
-
-
 def windows_propreties(windows):
     cv2.namedWindow(windows, cv2.WINDOW_KEEPRATIO)
     cv2.resizeWindow(windows, 1000, 608)
     return windows
+
+
+def input_resolution(cam, width, height, fps):
+    cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MPEG'))
+    cam.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+    cam.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+    cam.set(cv2.CAP_PROP_AUTOFOCUS, 1)
+    cam.set(cv2.CAP_PROP_FPS, fps)
+    return cam
 
 
 def move_detection(frame, previous_frame, change_limit):
@@ -69,11 +69,11 @@ def move_detection(frame, previous_frame, change_limit):
 
 
 def change_menu(key, menu, total_menu):
-    if key == 83:
+    if key == 83:  # right array
         menu += 1
         if menu > total_menu:
             menu = 1
-    if key == 81:
+    if key == 81:  # left array
         menu -= 1
         if menu == 0:
             menu = total_menu
@@ -83,14 +83,11 @@ def change_menu(key, menu, total_menu):
 
 
 def change_scale(key, scale):
-    # press up
-    if key == 84:
+    if key == 84:  # up array
         scale = min(scale + 0.1, 1)
-    # press down
-    if key == 82:
+    if key == 82:  # down array
         scale = max(scale - 0.1, 0.1)
-    # press space
-    if key == 32:
+    if key == 32:  # space key
         scale = 1
     return scale
 
@@ -117,8 +114,8 @@ def color_video(frame, menu, scale):
                 )
     frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
     if menu == 2:
-        frame[np.where((frame == [255, 255, 255]).all(axis=2))
-              ] = [240, 240, 240]
+        frame[np.where((frame == [0, 0, 0]).all(axis=2))] = [254, 254, 254]
+        frame[np.where((frame == [255, 255, 255]).all(axis=2))] = [0, 0, 0]
     if menu == 3:
         frame[np.where((frame == [0, 0, 0]).all(axis=2))] = [0, 240, 240]
         frame[np.where((frame == [255, 255, 255]).all(axis=2))] = [0, 0, 0]
@@ -128,27 +125,32 @@ def color_video(frame, menu, scale):
 def video_capture(connected_cam, cam_no):
     total_cam = len(connected_cam)
     current_cam = cam_no
+    # Loop for changing cam index
     while True:
         windows = windows_propreties('Roro Software')
         cam = cv2.VideoCapture(connected_cam[current_cam])
         cam = input_resolution(cam, 1920, 1080, 30)
+        # init values for menu and zoom
         scale = 1
         total_menu = 3
         menu = 1
+        key = -1
+        # parameters for mouvment detection
         current_frame = 0
         previous_frame = 0
         change_limit = 0.005
         change_statut = 1
-        key = -1
-        # for fps calculation
+        # paramters for fps calculation
         frame_nb = 0
         frame_max = 10
+        # get, modify and display frame
         while(cam.isOpened()):
-            # init fps start
+            # init fps calculation
             if frame_nb == 0:
                 now = time.time()
-            # recuperation du stream video
+            # capture video stream
             ret, frame = cam.read()
+            # detect mouvment to improve threshold output
             change_statut, previous_frame = move_detection(frame,
                                                            previous_frame,
                                                            change_limit)
@@ -177,7 +179,7 @@ def video_capture(connected_cam, cam_no):
                     current_cam = 0
                 else:
                     current_cam += 1
-            if key & 0xFF == 27:
+            if key & 0xFF == 27:  # escape
                 save_default_cam(connected_cam[current_cam])
                 cam.release()
                 cv2.destroyAllWindows()
