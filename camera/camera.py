@@ -43,12 +43,11 @@ def windows_propreties(windows):
     return windows
 
 
-def input_resolution(cam, width, height, fps):
-    cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MPEG'))
+def input_resolution(cam, width, height):
+    cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
     cam.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     cam.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
     cam.set(cv2.CAP_PROP_AUTOFOCUS, 1)
-    cam.set(cv2.CAP_PROP_FPS, fps)
     return cam
 
 
@@ -128,7 +127,7 @@ def video_capture(connected_cam, cam_no):
     # Loop for changing cam index
     while (cv2.getWindowProperty(windows, 0) >= 0):
         cam = cv2.VideoCapture(connected_cam[current_cam])
-        cam = input_resolution(cam, 1920, 1080, 30)
+        cam = input_resolution(cam, 1920, 1080)
         # init values for menu and zoom
         scale = 1
         total_menu = 3
@@ -170,6 +169,8 @@ def video_capture(connected_cam, cam_no):
                 print("fps = ", fps)
 
             key = cv2.waitKey(1)
+
+            # increment menu and scale variable
             menu = change_menu(key, menu, total_menu)
             scale = change_scale(key, scale)
             if key & 0xFF == ord('c'):

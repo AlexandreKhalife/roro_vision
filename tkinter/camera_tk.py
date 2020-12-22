@@ -71,7 +71,7 @@ class MyVideoCapture:
     def __init__(self, video_source=0):
         # Open the video source
         self.vid = cv2.VideoCapture(video_source)
-        self.vid.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MPEG'))
+        self.vid.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
         self.vid.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
         self.vid.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
         self.vid.set(cv2.CAP_PROP_AUTOFOCUS, 1)
