@@ -11,5 +11,5 @@ setup(name='roro_vision',
       packages=find_packages(),
       install_requires=requirements,
       include_package_data=True,
-      scripts=['scripts/roro_run'],
+      scripts=['scripts/roro_run.py'],
       zip_safe=False)
