@@ -5,9 +5,9 @@ import PIL.ImageTk
 
 
 class App:
-    def __init__(self, win, win_title, video_source=0, res=(800, 600)):
+    def __init__(self, win_title, video_source=0, res=(800, 600)):
         # Set main grid propreties
-        self.win = win
+        self.win = tk.Tk()
         self.win.geometry("1500x800")
         self.win.columnconfigure(0, weight=1)
         self.win.rowconfigure(0, weight=1)
@@ -115,4 +115,5 @@ class MyVideoCapture:
             self.vid.release()
 
 
-App(tk.Tk(), "Tkinter and OpenCV")
+if __name__ == '__main__':
+    App("Tkinter and OpenCV")
