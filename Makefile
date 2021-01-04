@@ -6,5 +6,8 @@ clean:
 dev_install:
 	@pip install -e .
 
+run:
+	@roro_run.py
+
 install:
 	@pip install .
