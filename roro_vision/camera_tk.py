@@ -95,7 +95,7 @@ class App:
 
 
 class MyVideoCapture:
-    def __init__(self, video_source=0):
+    def __init__(self, video_source=5):
         # Open the video source
         self.vid = cv2.VideoCapture(video_source)
         self.vid.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))

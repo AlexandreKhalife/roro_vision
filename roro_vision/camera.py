@@ -16,10 +16,16 @@ def test_open_cam():
                 connected_cam.append(port)
         except:
             continue
+    print(f'list of found cameras: {connected_cam}')
     return(connected_cam)
 
 
 def get_default_cam(connected_cam):
+    """
+    Get from FS last used Camera and try to use it
+    If succeed record id of last used Camera
+    Else: take first connected_cam found
+    """
     try:
         default_port = pickle.load(open('config/config', "rb"))
         if default_port in connected_cam:
