@@ -28,6 +28,7 @@ def get_default_cam(connected_cam):
     roro_config = Path().home() / '.rororc'
     try:
         default_port = pickle.load(open(roro_config, "rb"))
+        print(f'=> read {default_port} from {roro_config} file')
         if default_port in connected_cam:
             cam_no = connected_cam.index(default_port)
         else:
@@ -36,13 +37,14 @@ def get_default_cam(connected_cam):
         cam_no = 0
         default_port = 'Null'
         pickle.dump(default_port, open(roro_config, "wb+"))
+        print(f'=> write {default_port} to {roro_config} file')
     return cam_no
 
 
 def save_default_cam(cam_no):
     roro_config = Path().home() / '.rororc'
     pickle.dump(cam_no, open(roro_config, "wb"))
-
+    print(f'=> write {cam_no} to {roro_config} file')
 
 def windows_propreties(windows):
     cv2.namedWindow(windows, cv2.WINDOW_KEEPRATIO)

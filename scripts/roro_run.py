@@ -12,12 +12,12 @@ if __name__ == '__main__':
     parser.add_argument("-tk", "--use_tk", action="store_true",
                         help="Call tk version", default=False)
     args = parser.parse_args()
-    print(args)
+    print('=> ', args)
 
     if args.use_tk:
         App("Tkinter and OpenCV")
     else:
-        print('no Tk call camera.py')
+        print('=> no Tk, call camera.py')
         connected_cam = test_open_cam()
         cam_no = get_default_cam(connected_cam)
         video_capture(connected_cam, cam_no)
