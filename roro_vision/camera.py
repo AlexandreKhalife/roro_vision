@@ -1,11 +1,10 @@
 # webcam zoom
-# python3 / cv2
 
+from pathlib import Path
 import cv2
 import numpy as np
 import pickle
 import time
-
 
 def test_open_cam():
     connected_cam = []
@@ -16,7 +15,7 @@ def test_open_cam():
                 connected_cam.append(port)
         except:
             continue
-    print(f'list of found cameras: {connected_cam}')
+    print(f'=> list of found cameras: {connected_cam}')
     return(connected_cam)
 
 
@@ -26,8 +25,9 @@ def get_default_cam(connected_cam):
     If succeed record id of last used Camera
     Else: take first connected_cam found
     """
+    roro_config = Path().home() / '.rororc'
     try:
-        default_port = pickle.load(open('config/config', "rb"))
+        default_port = pickle.load(open(roro_config, "rb"))
         if default_port in connected_cam:
             cam_no = connected_cam.index(default_port)
         else:
@@ -35,12 +35,13 @@ def get_default_cam(connected_cam):
     except:
         cam_no = 0
         default_port = 'Null'
-        pickle.dump(default_port, open('config/config', "wb+"))
+        pickle.dump(default_port, open(roro_config, "wb+"))
     return cam_no
 
 
 def save_default_cam(cam_no):
-    pickle.dump(cam_no, open('config/config', "wb"))
+    roro_config = Path().home() / '.rororc'
+    pickle.dump(cam_no, open(roro_config, "wb"))
 
 
 def windows_propreties(windows):
