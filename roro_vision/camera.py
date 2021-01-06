@@ -3,8 +3,10 @@
 from pathlib import Path
 import cv2
 import numpy as np
-import pickle
 import time
+
+RORO_CONFIG = Path().home() / '.rororc'
+
 
 def test_open_cam():
     connected_cam = []
@@ -20,31 +22,30 @@ def test_open_cam():
 
 
 def get_default_cam(connected_cam):
-    """
-    Get from FS last used Camera and try to use it
-    If succeed record id of last used Camera
-    Else: take first connected_cam found
-    """
-    roro_config = Path().home() / '.rororc'
-    try:
-        default_port = pickle.load(open(roro_config, "rb"))
-        print(f'=> read {default_port} from {roro_config} file')
-        if default_port in connected_cam:
-            cam_no = connected_cam.index(default_port)
-        else:
-            cam_no = 0
-    except:
-        cam_no = 0
-        default_port = 'Null'
-        pickle.dump(default_port, open(roro_config, "wb+"))
-        print(f'=> write {default_port} to {roro_config} file')
-    return cam_no
+    if RORO_CONFIG.is_file():
+        with RORO_CONFIG.open(mode='r') as f: cam_no = int(f.readline())
+        print(f'=> read {cam_no} from {RORO_CONFIG} file')
+
+    if cam_no in connected_cam:
+        print(f"=> Saved '{cam_no}' is a connected cam. Let's use it")
+        return cam_no
+    elif 0 in connected_cam:
+        print(f"=> Saved '{cam_no}' not connected, use '0' connectd cam")
+        return 0
+    else:
+        raise Exception('=> Your cam is not seen (run lsusb)')
 
 
 def save_default_cam(cam_no):
-    roro_config = Path().home() / '.rororc'
-    pickle.dump(cam_no, open(roro_config, "wb"))
-    print(f'=> write {cam_no} to {roro_config} file')
+    if RORO_CONFIG.is_file():
+        with RORO_CONFIG.open(mode='r') as f: saved_cam = int(f.readline())
+        if cam_no != saved_cam:
+            with RORO_CONFIG.open(mode='w') as f: f.write(str(cam_no))
+            print(f'=> write {cam_no} to {RORO_CONFIG} file')
+    else:
+        with RORO_CONFIG.open(mode='w') as f: f.write(str(cam_no))
+        print(f'=> write {cam_no} to {RORO_CONFIG} file')
+
 
 def windows_propreties(windows):
     cv2.namedWindow(windows, cv2.WINDOW_KEEPRATIO)
