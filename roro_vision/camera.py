@@ -137,19 +137,15 @@ def video_capture(connected_cam, cam_no):
     while (cv2.getWindowProperty(windows, 0) >= 0):
         cam = cv2.VideoCapture(connected_cam[current_cam])
         cam = input_resolution(cam, 1920, 1080)
+
         # init values for menu and zoom
-        scale = 1
-        total_menu = 3
-        menu = 1
-        key = -1
+        scale, total_menu, menu, key = 1, 3, 1, -1
         # parameters for mouvment detection
-        current_frame = 0
-        previous_frame = 0
-        change_limit = 0.005
-        change_statut = 1
+        current_frame, previous_frame = 0, 0
+        change_limit, change_statut = 0.005, 1
         # paramters for fps calculation
-        frame_nb = 0
-        frame_max = 10
+        frame_nb, frame_max = 0, 10
+
         # get, modify and display frame
         while cam.isOpened():
             # init fps calculation
