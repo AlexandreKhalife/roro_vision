@@ -81,30 +81,6 @@ def move_detection(frame, previous_frame, change_limit):
     return change_statut, previous_frame
 
 
-def change_menu(key, menu, total_menu):
-    if key == 83:  # right array
-        menu += 1
-        if menu > total_menu:
-            menu = 1
-    if key == 81:  # left array
-        menu -= 1
-        if menu == 0:
-            menu = total_menu
-    else:
-        menu = menu
-    return menu
-
-
-def change_scale(key, scale):
-    if key == 84:  # up array
-        scale = min(scale + 0.1, 1)
-    if key == 82:  # down array
-        scale = max(scale - 0.1, 0.1)
-    if key == 32:  # space key
-        scale = 1
-    return scale
-
-
 def scale_video(frame, height, width, scale):
     # calcul de la plage à afficher
     centerX, centerY = int(height/2), int(width/2)
@@ -135,7 +111,50 @@ def color_video(frame, menu, scale):
     return frame
 
 
+def change_menu(key, menu, total_menu):
+    if key == 83:  # right array
+        menu += 1
+        if menu > total_menu:
+            menu = 1
+    if key == 81:  # left array
+        menu -= 1
+        if menu == 0:
+            menu = total_menu
+    else:
+        menu = menu
+    return menu
+
+
+def change_scale(key, scale):
+    if key == 84:  # up array
+        scale = min(scale + 0.1, 1)
+    if key == 82:  # down array
+        scale = max(scale - 0.1, 0.1)
+    if key == 32:  # space key
+        scale = 1
+    return scale
+
+
 def video_capture(connected_cam, cam_no):
+    """
+    windows_propreties
+    input_resolution
+    ## capture video stream
+
+    ## detect mouvement to improve threshold output
+    move_detection
+
+    ## Action on current_frame
+    scale_video
+    color_video
+
+    ## increment menu and scale variable
+    change_menu
+    change_scale
+
+    save_default_cam
+    """
+
     total_cam = len(connected_cam)
     current_cam = cam_no
     windows = windows_propreties('Roro Reading System')
