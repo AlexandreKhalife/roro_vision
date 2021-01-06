@@ -10,13 +10,18 @@ RORO_CONFIG = Path().home() / '.rororc'
 
 def test_open_cam():
     connected_cam = []
+    print('start')
     for port in range(0, 10):
         try:
+            print(f'==> test port: {port}')
             cam = cv2.VideoCapture(port)
             if cam.isOpened():
                 connected_cam.append(port)
+            cam.release()
+            cv2.destroyAllWindows()
         except:
-            continue
+            cam.release()
+            cv2.destroyAllWindows()
     print(f'=> list of found cameras: {connected_cam}')
     return(connected_cam)
 
@@ -133,7 +138,7 @@ def color_video(frame, menu, scale):
 def video_capture(connected_cam, cam_no):
     total_cam = len(connected_cam)
     current_cam = cam_no
-    windows = windows_propreties('Roro Software')
+    windows = windows_propreties('Roro Reading System')
     # Loop for changing cam index
     while (cv2.getWindowProperty(windows, 0) >= 0):
         cam = cv2.VideoCapture(connected_cam[current_cam])
