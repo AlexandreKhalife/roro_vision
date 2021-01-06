@@ -135,6 +135,17 @@ def change_scale(key, scale):
     return scale
 
 
+def documentation(fps):
+    msg = f"""
+    up_arrow:    zoom_in      | right_arrow: border images black
+    down_arrow:  zoom_out     | right_arrow: border images yellow
+    Escape:      zoom_reset   | ...
+
+    fps = {fps}
+    """
+    print (msg)
+
+
 def video_capture(connected_cam, cam_no):
     """
     windows_propreties
@@ -169,7 +180,7 @@ def video_capture(connected_cam, cam_no):
         current_frame, previous_frame = 0, 0
         change_limit, change_statut = 0.005, 1
         # paramters for fps calculation
-        frame_nb, frame_max = 0, 10
+        fps, frame_nb, frame_max = 0, 0, 10
 
         # get, modify and display frame
         while cam.isOpened():
@@ -195,11 +206,12 @@ def video_capture(connected_cam, cam_no):
             if frame_nb == frame_max:
                 frame_nb = 0
                 duration = (time.time() - now)
-                fps = frame_max / duration
-                print("fps = ", fps)
+                fps_old = fps
+                fps = int(frame_max / duration)
+                if fps != fps_old:
+                    documentation(fps)
 
             key = cv2.waitKey(1)
-
             # increment menu and scale variable
             menu = change_menu(key, menu, total_menu)
             scale = change_scale(key, scale)
