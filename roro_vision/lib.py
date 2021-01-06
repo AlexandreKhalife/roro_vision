@@ -108,7 +108,7 @@ class MyVideoCapture:
     def get_frame(self):
         if self.vid.isOpened():
             ret, frame = self.vid.read()
-            return (ret, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            return ret, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     def __del__(self):
         if self.vid.isOpened():

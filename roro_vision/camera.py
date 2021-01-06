@@ -23,7 +23,7 @@ def test_open_cam():
             cam.release()
             cv2.destroyAllWindows()
     print(f'=> list of found cameras: {connected_cam}')
-    return(connected_cam)
+    return connected_cam
 
 
 def get_default_cam(connected_cam):
